@@ -5,13 +5,6 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 import rx.Observable
 
-/**
- * @author zhouwenliang(gzzhouwenliang@corp.netease.com)
- * *
- * @usage
- * *
- * @time 2017/5/8 0008
- */
 interface SleepApi {
     @GET("post_sleep.php")
     fun sleep(@Query("username") username: String, @Query("sleep_time") sleepTime: Long): Observable<Void>

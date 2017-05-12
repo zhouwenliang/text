@@ -7,18 +7,12 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.text.TextUtils
 import android.util.AttributeSet
+import android.util.Log
 import cn.zhouwl.sleeptime.entity.Sleep
 
 import com.p_v.flexiblecalendar.entity.Event
 import com.p_v.flexiblecalendar.view.BaseCellView
 
-/**
- * @author zhouwenliang(gzzhouwenliang@corp.netease.com)
- * *
- * @usage
- * *
- * @time 2017/5/12 0012
- */
 class EventCellView : BaseCellView {
 
     private lateinit var mPaint: Paint
@@ -34,6 +28,7 @@ class EventCellView : BaseCellView {
     private var eventTextSize: Int = 0
     private var sleepText: String? = null
     private var okiText: String? = null
+    private var sleepLengthText: String? = null
 
     constructor(context: Context) : super(context) {}
 
@@ -92,6 +87,9 @@ class EventCellView : BaseCellView {
             okiText?.apply {
                 canvas.drawText(okiText, 80f, 50f, mTextPaint)
             }
+            sleepLengthText?.apply {
+                canvas.drawText(sleepLengthText, 80f, 120f, mTextPaint)
+            }
         }
     }
 
@@ -102,16 +100,17 @@ class EventCellView : BaseCellView {
                 val sleepEvent = item as SleepEvent
                 sleepText = sleepEvent.sleepText
                 okiText = sleepEvent.okiText
+                sleepLengthText = sleepEvent.sleepLength
             }
             mPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-            mPaint!!.style = Paint.Style.FILL
-            mPaint!!.color = eventBackground
+            mPaint.style = Paint.Style.FILL
+            mPaint.color = eventBackground
             invalidate()
             requestLayout()
         }
     }
 
-    class SleepEvent(val sleepText: String, val okiText: String? = null) : Event {
+    class SleepEvent(val sleepText: String, val okiText: String? = null, val sleepLength: String? = null) : Event {
         var eventCorlor: Int = 0xffffff
         override fun getColor(): Int {
             return eventCorlor

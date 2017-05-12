@@ -2,13 +2,8 @@ package cn.zhouwl.sleeptime
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.text.TextUtils
-import android.util.Log
 import android.view.*
 import android.widget.ListView
-import android.widget.Toast
-
-import com.prolificinteractive.materialcalendarview.MaterialCalendarView
 
 import java.util.Calendar
 import java.util.Date
@@ -31,17 +26,11 @@ class MainActivity : AppCompatActivity() {
     lateinit var mSleepApi: SleepApi
     lateinit var calendarView: FlexibleCalendarView
     var sleepList: List<Sleep>? = null
-    //MaterialCalendarView materialCalendarView;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mListView = findViewById(R.id.sleepListView) as ListView
-        //        materialCalendarView = (MaterialCalendarView) findViewById(R.id.calendarView);
-        //        materialCalendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_MULTIPLE);
-        //        materialCalendarView.setSelectionColor(0xFF0000FF);
-        //        materialCalendarView.setDateSelected(new Date(), true);
-        //        materialCalendarView.setDateSelected(new Date(2017, 5, 5), true);
         calendarView = findViewById(R.id.calendar_view) as FlexibleCalendarView
         calendarView.setMonthViewHorizontalSpacing(1)
         calendarView.setMonthViewVerticalSpacing(1)
@@ -83,12 +72,23 @@ class MainActivity : AppCompatActivity() {
                         else
                             null
                     }
-                    return@setEventDataProvider listOf(EventCellView.SleepEvent(sleepText, okiText))
+                    var sleepLengthText: String? = null
+
+                    if (it.okiTime > 0) {
+                        val sleepLength = it.okiTime - it.sleep_time
+                        val hour = sleepLength / 3600000
+                        val minute = sleepLength % 3600000 / 60000
+                        sleepLengthText = ""
+                        if (hour > 0) {
+                            sleepLengthText += hour.toString() + "小时"
+                        }
+                        sleepLengthText += minute.toString() + "分"
+                    }
+                    return@setEventDataProvider listOf(EventCellView.SleepEvent(sleepText, okiText, sleepLengthText))
                 }
             }
             null
         }
-        //calendarView.setEventDataProvider { year, month, day -> getEvents(year, month, day) }
         mSleepApi = RxService.createApi(SleepApi::class.java)
         getSleepData()
     }
@@ -123,11 +123,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-        /*
-         * 将actionBar的HomeButtonEnabled设为ture，
-         *
-         * 将会执行此case
-         */
             R.id.sleep -> mSleepApi.sleep("zhouwl", System.currentTimeMillis())
                     .subscribeOn(Schedulers.io())
                     .subscribeOn(AndroidSchedulers.mainThread())

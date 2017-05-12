@@ -5,13 +5,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-/**
- * @author zhouwenliang(gzzhouwenliang@corp.netease.com)
- * *
- * @usage
- * *
- * @time 2017/5/8 0008
- */
 class DateUtils {
 
     /**

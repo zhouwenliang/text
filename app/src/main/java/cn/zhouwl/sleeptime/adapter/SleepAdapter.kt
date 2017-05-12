@@ -11,13 +11,6 @@ import cn.zhouwl.sleeptime.R
 import cn.zhouwl.sleeptime.entity.Sleep
 import cn.zhouwl.sleeptime.util.DateUtils
 
-/**
- * @author zhouwenliang(gzzhouwenliang@corp.netease.com)
- * *
- * @usage
- * *
- * @time 2017/5/8 0008
- */
 class SleepAdapter(private val sleepList: List<Sleep>?) : BaseAdapter() {
 
     public override fun getCount(): Int {
