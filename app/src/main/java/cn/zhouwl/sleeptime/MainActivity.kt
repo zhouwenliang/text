@@ -2,6 +2,7 @@ package cn.zhouwl.sleeptime
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.ListView
 
@@ -11,6 +12,7 @@ import java.util.Date
 import cn.zhouwl.sleeptime.adapter.SleepAdapter
 import cn.zhouwl.sleeptime.api.RxService
 import cn.zhouwl.sleeptime.api.SleepApi
+import cn.zhouwl.sleeptime.entity.Result
 import cn.zhouwl.sleeptime.entity.Sleep
 import cn.zhouwl.sleeptime.util.DateUtils
 import cn.zhouwl.sleeptime.view.EventCellView
@@ -111,6 +113,7 @@ class MainActivity : AppCompatActivity() {
                         val sleepAdapter = SleepAdapter(sleeps)
                         mListView.adapter = sleepAdapter
                         calendarView.refresh()
+                        calendarView.invalidate()
                     }
                 })
     }
@@ -126,33 +129,33 @@ class MainActivity : AppCompatActivity() {
             R.id.sleep -> mSleepApi.sleep("zhouwl", System.currentTimeMillis())
                     .subscribeOn(Schedulers.io())
                     .subscribeOn(AndroidSchedulers.mainThread())
-                    .subscribe(object : Observer<Void> {
+                    .subscribe(object : Observer<Result> {
                         override fun onCompleted() {
-                            getSleepData()
+
                         }
 
                         override fun onError(e: Throwable) {
 
                         }
 
-                        override fun onNext(aVoid: Void) {
-
+                        override fun onNext(aVoid: Result) {
+                            getSleepData()
                         }
                     })
             R.id.oki -> mSleepApi.oki("zhouwl", System.currentTimeMillis())
                     .subscribeOn(Schedulers.io())
                     .subscribeOn(AndroidSchedulers.mainThread())
-                    .subscribe(object : Observer<Void> {
+                    .subscribe(object : Observer<Result> {
                         override fun onCompleted() {
-                            getSleepData()
+
                         }
 
                         override fun onError(e: Throwable) {
 
                         }
 
-                        override fun onNext(aVoid: Void) {
-
+                        override fun onNext(aVoid: Result) {
+                            getSleepData()
                         }
                     })
             else -> {
