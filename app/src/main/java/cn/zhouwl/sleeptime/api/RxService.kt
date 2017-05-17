@@ -17,7 +17,6 @@ object RxService {
             .build()
 
     fun <T> createApi(clazz: Class<T>): T {
-
         return retrofit.create(clazz)
     }
 

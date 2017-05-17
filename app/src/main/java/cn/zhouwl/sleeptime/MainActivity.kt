@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.ListView
+import android.widget.Toast
 
 import java.util.Calendar
 import java.util.Date
@@ -34,8 +35,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         mListView = findViewById(R.id.sleepListView) as ListView
         calendarView = findViewById(R.id.calendar_view) as FlexibleCalendarView
-        calendarView.setMonthViewHorizontalSpacing(1)
-        calendarView.setMonthViewVerticalSpacing(1)
+        calendarView.setMonthViewHorizontalSpacing(0)
+        calendarView.setMonthViewVerticalSpacing(0)
 
         calendarView.setCalendarView(object : FlexibleCalendarView.CalendarView {
             override fun getCellView(position: Int, convertView: View?, parent: ViewGroup, cellType: Int): BaseCellView {
@@ -63,14 +64,14 @@ class MainActivity : AppCompatActivity() {
 
         calendarView.setEventDataProvider { year, month, day ->
             sleepList?.forEach  {
-                val sleepDate = Date(it.sleep_time)
+                val sleepDate = Date(it.sleep_time - 3 * 3600 * 1000)
                 val calendar = Calendar.getInstance()
                 calendar.setTime(sleepDate)
                 if (calendar.get(Calendar.YEAR) == year && calendar.get(Calendar.MONTH) == month && calendar.get(Calendar.DAY_OF_MONTH) == day) {
-                    var sleepText = "睡觉:" + DateUtils.getTimeFromtimestamp(it.sleep_time)
+                    var sleepText = "睡觉:${DateUtils.getTimeFromtimestamp(it.sleep_time)}"
                     var okiText = it.okiTime.let {
                         if (it > 0)
-                            "起床:" + DateUtils.getTimeFromtimestamp(it)
+                            "起床:${DateUtils.getTimeFromtimestamp(it)}"
                         else
                             null
                     }
@@ -86,10 +87,22 @@ class MainActivity : AppCompatActivity() {
                         }
                         sleepLengthText += minute.toString() + "分"
                     }
-                    return@setEventDataProvider listOf(EventCellView.SleepEvent(sleepText, okiText, sleepLengthText))
+                    val cal = Calendar.getInstance()
+                    cal.set(Calendar.YEAR, calendar.get(Calendar.YEAR))
+                    cal.set(Calendar.MONTH, calendar.get(Calendar.MONTH))
+                    cal.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH))
+                    cal.set(Calendar.HOUR_OF_DAY, 24)
+                    cal.set(Calendar.SECOND, 0)
+                    cal.set(Calendar.MINUTE, 0)
+                    cal.set(Calendar.MILLISECOND, 0)
+                    return@setEventDataProvider listOf(EventCellView.SleepEvent(sleepText, okiText, sleepLengthText, it.sleep_time > cal.timeInMillis ))
                 }
             }
             null
+        }
+        supportActionBar?.title = "${calendarView.currentYear}年${calendarView.currentMonth}月"
+        calendarView.setOnMonthChangeListener { year, month, direction ->
+            supportActionBar?.title = "${year}年${month}月"
         }
         mSleepApi = RxService.createApi(SleepApi::class.java)
         getSleepData()
@@ -128,7 +141,7 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             R.id.sleep -> mSleepApi.sleep("zhouwl", System.currentTimeMillis())
                     .subscribeOn(Schedulers.io())
-                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(object : Observer<Result> {
                         override fun onCompleted() {
 
@@ -138,24 +151,32 @@ class MainActivity : AppCompatActivity() {
 
                         }
 
-                        override fun onNext(aVoid: Result) {
-                            getSleepData()
+                        override fun onNext(result: Result) {
+                            if (result.code == 1) {
+                                getSleepData()
+                            } else {
+                                Toast.makeText(this@MainActivity, result.errorMessage, 2000).show()
+                            }
                         }
                     })
             R.id.oki -> mSleepApi.oki("zhouwl", System.currentTimeMillis())
                     .subscribeOn(Schedulers.io())
-                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(object : Observer<Result> {
                         override fun onCompleted() {
 
                         }
 
                         override fun onError(e: Throwable) {
-
+                            e.printStackTrace()
                         }
 
-                        override fun onNext(aVoid: Result) {
-                            getSleepData()
+                        override fun onNext(result: Result) {
+                            if (result.code == 1) {
+                                getSleepData()
+                            } else {
+                                Toast.makeText(this@MainActivity, result.errorMessage, Toast.LENGTH_LONG).show()
+                            }
                         }
                     })
             else -> {

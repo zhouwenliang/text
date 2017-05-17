@@ -29,6 +29,7 @@ class EventCellView : BaseCellView {
     private var sleepText: String? = null
     private var okiText: String? = null
     private var sleepLengthText: String? = null
+    private var over12: Boolean = false
 
     constructor(context: Context) : super(context) {}
 
@@ -101,16 +102,22 @@ class EventCellView : BaseCellView {
                 sleepText = sleepEvent.sleepText
                 okiText = sleepEvent.okiText
                 sleepLengthText = sleepEvent.sleepLength
+                over12 = sleepEvent.over12
             }
             mPaint = Paint(Paint.ANTI_ALIAS_FLAG)
             mPaint.style = Paint.Style.FILL
             mPaint.color = eventBackground
+            if (over12) {
+                setBackgroundColor(context.resources.getColor(android.R.color.holo_blue_bright))
+            } else {
+                setBackgroundColor(context.resources.getColor(android.R.color.holo_orange_dark))
+            }
             invalidate()
             requestLayout()
         }
     }
 
-    class SleepEvent(val sleepText: String, val okiText: String? = null, val sleepLength: String? = null) : Event {
+    class SleepEvent(val sleepText: String, val okiText: String? = null, val sleepLength: String? = null, val over12: Boolean = false) : Event {
         var eventCorlor: Int = 0xffffff
         override fun getColor(): Int {
             return eventCorlor
