@@ -22,6 +22,7 @@ import com.p_v.flexiblecalendar.view.BaseCellView
 import rx.Observer
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity() {
 
@@ -106,6 +107,7 @@ class MainActivity : AppCompatActivity() {
         }
         mSleepApi = RxService.createApi(SleepApi::class.java)
         getSleepData()
+        getNoteData()
     }
 
     fun getSleepData() {
@@ -129,6 +131,17 @@ class MainActivity : AppCompatActivity() {
                         calendarView.invalidate()
                     }
                 })
+    }
+
+    fun getNoteData() {
+        mSleepApi.getNote("zhouwl")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe{noteResult ->
+                    if (noteResult.code == 1) {
+                        Log.d("zhouwenliang", noteResult.data?.size.toString())
+                    }
+                }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
