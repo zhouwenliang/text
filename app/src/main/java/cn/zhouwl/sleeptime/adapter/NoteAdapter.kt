@@ -8,13 +8,14 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 
 import cn.zhouwl.sleeptime.R
+import cn.zhouwl.sleeptime.entity.NoteResult
 import cn.zhouwl.sleeptime.entity.Sleep
 import cn.zhouwl.sleeptime.util.DateUtils
 
-class NoteAdapter(private val sleepList: List<Sleep>?) : BaseAdapter() {
+class NoteAdapter(private val noteList: List<NoteResult.Note>?) : BaseAdapter() {
 
     public override fun getCount(): Int {
-        return if (sleepList == null) 0 else sleepList!!.size
+        return if (noteList == null) 0 else noteList!!.size
     }
 
     public override fun getItem(i: Int): Any? {
@@ -29,52 +30,23 @@ class NoteAdapter(private val sleepList: List<Sleep>?) : BaseAdapter() {
         var view = view
         val holder: ViewHolder
         if (view == null) {
-            view = View.inflate(viewGroup.getContext(), R.layout.sleep_list_item, null)
+            view = View.inflate(viewGroup.getContext(), R.layout.note_list_item, null)
             holder = ViewHolder()
-            holder.dateTextView = view!!.findViewById(R.id.date) as TextView
-            holder.sleepTimeTextView = view!!.findViewById(R.id.sleepTime) as TextView
-            holder.okiTimeTextView = view!!.findViewById(R.id.okiTime) as TextView
-            holder.sleepLengthTextView = view!!.findViewById(R.id.sleepLength) as TextView
-            holder.reasonTextView = view!!.findViewById(R.id.reason) as TextView
+            holder.noteTextView = view!!.findViewById(R.id.note) as TextView
+            holder.timeTextView = view!!.findViewById(R.id.time) as TextView
             view!!.setTag(holder)
         } else {
             holder = view!!.getTag() as ViewHolder
         }
-        holder.dateTextView.setText(DateUtils.getDayFromtimestamp(sleepList!!.get(i).sleep_time))
-        holder.sleepTimeTextView.setText("睡觉时间:" + DateUtils.getTimeFromtimestamp(sleepList!!.get(i).sleep_time))
-        if (sleepList!!.get(i).okiTime == 0L) {
-            holder.okiTimeTextView.setVisibility(View.GONE)
-            holder.sleepLengthTextView.setVisibility(View.GONE)
-        } else {
-            holder.okiTimeTextView.setVisibility(View.VISIBLE)
-            holder.okiTimeTextView.setText("起床时间:" + DateUtils.getTimeFromtimestamp(sleepList!!.get(i).okiTime))
-            holder.sleepLengthTextView.setVisibility(View.VISIBLE)
-            val sleepLength = sleepList.get(i).okiTime - sleepList.get(i).sleep_time
-            val hour = sleepLength / 3600000
-            val minute = sleepLength % 3600000 / 60000
-            var sleepLengthText = ""
-            if (hour > 0) {
-                sleepLengthText += hour.toString()  + "小时"
-            }
-            sleepLengthText += minute.toString() + "分"
-
-            holder.sleepLengthTextView.setText("睡觉时长:" + sleepLengthText)
-        }
-        if (TextUtils.isEmpty(sleepList.get(i).reason)) {
-            holder.reasonTextView.setText("正常睡觉")
-        } else {
-            holder.reasonTextView.setText(sleepList!!.get(i).reason)
-        }
+        holder.noteTextView.text = noteList!!.get(i).content
+        holder.timeTextView.text = (DateUtils.timestampToDate(noteList!!.get(i).time!!))
 
         return view
     }
 
 
     inner class ViewHolder {
-        lateinit var dateTextView: TextView
-        lateinit var sleepTimeTextView: TextView
-        lateinit var okiTimeTextView: TextView
-        lateinit var sleepLengthTextView: TextView
-        lateinit var reasonTextView: TextView
+        lateinit var noteTextView: TextView
+        lateinit var timeTextView: TextView
     }
 }

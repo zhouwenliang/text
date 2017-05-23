@@ -3,9 +3,7 @@ package cn.zhouwl.sleeptime.api
 import cn.zhouwl.sleeptime.entity.NoteResult
 import cn.zhouwl.sleeptime.entity.Result
 import cn.zhouwl.sleeptime.entity.Sleep
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 import rx.Observable
 
 interface SleepApi {
@@ -20,4 +18,8 @@ interface SleepApi {
 
     @GET("get_note.php")
     fun getNote(@Query("username") username: String): Observable<NoteResult>
+
+    @FormUrlEncoded
+    @POST("post_note.php")
+    fun postNote(@Field("username") username: String, @Field("content") content: String): Observable<Result>
 }

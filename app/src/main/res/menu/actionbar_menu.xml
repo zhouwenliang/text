@@ -10,4 +10,9 @@
         android:id="@+id/oki"
         android:orderInCategory="1"
         android:title="起床"/>
+
+    <item
+        android:id="@+id/post_note"
+        android:orderInCategory="1"
+        android:title="笔记"/>
 </menu>

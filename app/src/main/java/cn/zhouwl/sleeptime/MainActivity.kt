@@ -2,17 +2,19 @@ package cn.zhouwl.sleeptime
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.*
 import android.widget.ListView
 import android.widget.Toast
+import cn.zhouwl.sleeptime.adapter.NoteAdapter
 
 import java.util.Calendar
 import java.util.Date
 
-import cn.zhouwl.sleeptime.adapter.SleepAdapter
 import cn.zhouwl.sleeptime.api.RxService
 import cn.zhouwl.sleeptime.api.SleepApi
+import cn.zhouwl.sleeptime.entity.NoteResult
 import cn.zhouwl.sleeptime.entity.Result
 import cn.zhouwl.sleeptime.entity.Sleep
 import cn.zhouwl.sleeptime.util.DateUtils
@@ -23,6 +25,9 @@ import rx.Observer
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import kotlin.properties.Delegates
+import android.widget.EditText
+
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,6 +35,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var mSleepApi: SleepApi
     lateinit var calendarView: FlexibleCalendarView
     var sleepList: List<Sleep>? = null
+    var noteList: List<NoteResult.Note>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,13 +107,14 @@ class MainActivity : AppCompatActivity() {
             }
             null
         }
-        supportActionBar?.title = "${calendarView.currentYear}年${calendarView.currentMonth}月"
+        supportActionBar?.title = "${calendarView.currentYear}年${calendarView.currentMonth + 1}月"
         calendarView.setOnMonthChangeListener { year, month, direction ->
-            supportActionBar?.title = "${year}年${month}月"
+            supportActionBar?.title = "${year}年${month + 1}月"
         }
         mSleepApi = RxService.createApi(SleepApi::class.java)
         getSleepData()
         getNoteData()
+        //postNote("zhouwl", "周文亮哈哈");
     }
 
     fun getSleepData() {
@@ -125,8 +132,6 @@ class MainActivity : AppCompatActivity() {
 
                     override fun onNext(sleeps: List<Sleep>) {
                         sleepList = sleeps
-                        val sleepAdapter = SleepAdapter(sleeps)
-                        mListView.adapter = sleepAdapter
                         calendarView.refresh()
                         calendarView.invalidate()
                     }
@@ -137,11 +142,20 @@ class MainActivity : AppCompatActivity() {
         mSleepApi.getNote("zhouwl")
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe{noteResult ->
+                .subscribe({ noteResult ->
                     if (noteResult.code == 1) {
-                        Log.d("zhouwenliang", noteResult.data?.size.toString())
+                        noteList = noteResult.data
+                        val noteAdapter = NoteAdapter(noteList)
+                        mListView.adapter = noteAdapter
                     }
-                }
+                }, { exception -> exception.printStackTrace() })
+    }
+
+    fun postNote(username: String, content: String) {
+        mSleepApi.postNote(username, content)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({result -> getNoteData()}, {e-> e.printStackTrace()})
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -192,6 +206,19 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     })
+            R.id.post_note -> {
+                var builder = AlertDialog.Builder(this)
+                builder.setTitle("记录");
+                val editText = EditText(this)
+                editText.id = 0xFF4011
+                builder.setView(editText, 20, 20, 20, 20)
+                builder.setNegativeButton("取消", null);
+                builder.setPositiveButton("确定") {
+                    dialog, which ->
+                        postNote("zhouwl", editText.text.toString())
+                }
+                builder.show();
+            }
             else -> {
             }
         }
